@@ -23,7 +23,7 @@ This allows comparison of behavior, performance, and state diagram complexity be
 
 ## Test Input Sequence
 
-Example input sequence used in testbenches: 1011
+Example input sequence used in testbenches: 1011011
 
 ## Waveform Results
 
