@@ -27,7 +27,11 @@ Example input sequence used in testbenches: 1011
 
 ## Waveform Results
 
-Simulation waveforms are available inside the `waveform_screenshots/` folder to verify the detector functionality.
+Simulation waveforms are available in the .png files named as:
+Mealy Overlapping 
+Mealy Non-overlapping
+Moore Overlapping 
+Moore Non-overlapping
 
 ## Concepts Covered
 
