@@ -1,47 +1,80 @@
-# 1011 Sequence Detector (Mealy & Moore Machine)
+# 1011 Sequence Detector (Mealy & Moore FSMs)
 
-This project implements a **1011 sequence detector** using both **Mealy** and **Moore** state machine models in **Verilog**. It detects the binary pattern `1011` in a serial input stream and provides an output signal when the sequence is recognized.
+A Verilog implementation of a **1011 pattern detector** written in both *Mealy* and *Moore* styles, with test-benches, waveforms, and Vivado project files for quick simulation and synthesis.
 
-## Project Overview
+## Repository Map
 
-The sequence detector is implemented in two styles:
-- **Mealy Machine**: Output depends on the current state and input.
-- **Moore Machine**: Output depends only on the current state.
+| Path                        | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| mealy_overlapping.v       | Mealy FSM that *allows* overlapping pattern occurrences                   |
+| mealy_non-overlapping.v   | Mealy FSM that *blocks* overlapping matches                               |
+| moore_overlapping.v       | Moore FSM that *allows* overlaps                                          |
+| moore_non-overlapping.v   | Moore FSM that *blocks* overlaps                                          |
+| testbench_*               | Four self-checking benches—one per design variant                           |
+| *.png                     | Timing & schematic screenshots exported from Vivado                         |
+| 1011 Sequence Detector.xpr| Vivado 2018.2 project for out-of-the-box simulation                         |
+| README.md                 | (You are here) project documentation                                        |
 
-This allows comparison of behavior, performance, and state diagram complexity between the two models.
+## Theory
 
-## How to Run
+| Model    | Output depends on         | Typical advantages                     |
+|----------|--------------------------|----------------------------------------|
+| *Mealy| Current **state + input*| Fewer states, faster response          |
+| *Moore| **State only*           | Glitch-free, easier timing closure     |
 
-1. **Tools Required**:  
-   - Xilinx Vivado (or any Verilog simulation tool like ModelSim, GTKWave, etc.)
+Both variants in this repo are written in a *one-hot* style using parameter-encoded states for clear readability.
 
-2. **Steps**:
-   - Open your simulator and create a new project.
-   - Add the Verilog files and respective testbenches.
-   - Run the simulation and observe the output waveform.
-   - Verify the output signal goes HIGH when `1011` sequence is detected.
+## Quick-Start
 
-## Test Input Sequence
+1. *Clone*
+git clone https://github.com/NandanLenka/1011-Sequence-Detector.git
+cd 1011-Sequence-Detector
 
-Example input sequence used in testbenches: 1011011
+text
 
-## Waveform Results
+2. *Open* the .xpr in *Xilinx Vivado*  
+(ModelSim / Icarus + GTKWave are equally fine—just add the source & TB files).
 
-Simulation waveforms are available in the .png files named as:
-- Mealy Overlapping 
-- Mealy Non-overlapping
-- Moore Overlapping 
-- Moore Non-overlapping
+3. *Run simulation*  
+All four benches apply the test vector **1011011** and print y on every clock edge. Overlapping versions should detect *two* matches; non-overlapping versions detect *one*.
 
-## Concepts Covered
+4. *Inspect waveforms*  
+Compare your traces with the reference images:
 
-- Finite State Machine (FSM)
-- Mealy and Moore Models
-- Sequence Detection
-- Verilog HDL
-- Digital Design Simulation
+- Mealy Overlapping.png
+- Mealy Non-overlapping.png
+- Moore Overlapping.png
+- Moore Non-overlapping.png
 
+## Using the Modules
 
+module top;
+reg clk = 0, reset = 1, x;
+wire y;
 
+// pick any of the four variants
+mealy_overlapping dut (.clk(clk), .reset(reset), .x(x), .y(y));
 
+always #5 clk = ~clk; // 100 MHz
+initial begin
+#12 reset = 0;
+repeat(100) begin
+x = $random; #10;
+end
+end
+endmodule
 
+text
+
+Active-high synchronous reset is used throughout.
+
+## Results Snapshot
+
+The table shows the number of states and whether overlapping matches are reported.
+
+| Variant                      | States | Overlap? | First valid y pulse         |
+|------------------------------|--------|----------|-------------------------------|
+| Mealy – Overlapping          | 4      | ✅       | 1 cycle after last bit        |
+| Mealy – Non-overlapping      | 5      | ❌       | 1 cycle after last bit        |
+| Moore – Overlapping          | 5      | ✅       | *2 cycles* after last bit   |
+| Moore – Non-overlapping      | 5      | ❌       | *2 cycles* after last bit   |
